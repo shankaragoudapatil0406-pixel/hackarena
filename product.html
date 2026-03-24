@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product – FarmDirect</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.product-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+.product-img-main { border-radius: var(--radius-xl); overflow: hidden; aspect-ratio: 4/3; box-shadow: var(--shadow-lg); }
+.product-img-main img { width:100%; height:100%; object-fit:cover; }
+.product-meta { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; flex-wrap:wrap; }
+.product-price-big { font-family: var(--font-head); font-size: 2.6rem; font-weight: 800; color: var(--green-700); }
+.product-price-big small { font-size: 1rem; color: var(--gray-500); font-weight: 500; }
+.product-savings { background: var(--green-50); border: 1.5px solid var(--green-200,#a0d4b0); border-radius: var(--radius-md); padding: 0.75rem 1.1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+.product-savings i { color: var(--green-600); font-size:1.1rem; }
+.product-savings p { font-size:0.84rem; color:var(--green-700); margin:0; }
+.product-savings strong { font-weight:700; }
+.qty-wrap { display:flex; align-items:center; gap:0; border:1.5px solid var(--gray-200); border-radius:var(--radius-sm); overflow:hidden; width:fit-content; }
+.qty-btn { width:38px; height:38px; background:var(--gray-100); border:none; font-size:1.1rem; cursor:pointer; transition:var(--transition); }
+.qty-btn:hover { background:var(--green-100); color:var(--green-700); }
+.qty-num { width:48px; text-align:center; font-weight:700; font-size:1rem; border:none; border-left:1px solid var(--gray-200); border-right:1px solid var(--gray-200); padding:0 4px; }
+.farmer-info-card { background: var(--green-50); border: 1.5px solid var(--green-100); border-radius: var(--radius-lg); padding: 1.2rem 1.4rem; display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; text-decoration:none; transition:var(--transition); }
+.farmer-info-card:hover { background:var(--green-100); }
+.farmer-info-card img { width:52px; height:52px; border-radius:50%; object-fit:cover; border:3px solid var(--white); box-shadow:var(--shadow-sm); }
+.farmer-info-card .farmer-name { font-weight:700; font-size:0.95rem; color:var(--green-800); }
+.farmer-info-card .farmer-loc { font-size:0.8rem; color:var(--gray-500); }
+.farmer-info-card .farmer-rating { font-size:0.82rem; font-weight:600; color: var(--amber-600); }
+/* Reviews */
+.review-card { background:var(--gray-50); border:1px solid var(--gray-100); border-radius:var(--radius-md); padding:1.1rem 1.3rem; }
+.review-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.review-top .reviewer { font-weight:700; font-size:0.9rem; }
+.review-top .review-date { font-size:0.78rem; color:var(--gray-500); }
+.review-card p { font-size:0.88rem; color:var(--gray-700); line-height:1.65; }
+.rating-breakdown { display:flex; flex-direction:column; gap:6px; margin-bottom:1.5rem; }
+.rating-row { display:flex; align-items:center; gap:10px; font-size:0.82rem; }
+.rating-bar-wrap { flex:1; height:8px; background:var(--gray-200); border-radius:4px; overflow:hidden; }
+.rating-bar { height:100%; background:var(--amber-500); border-radius:4px; transition:width 0.8s ease; }
+/* Similar products mini */
+.similar-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+.similar-card { border:1px solid var(--gray-100); border-radius:var(--radius-md); overflow:hidden; transition:var(--transition); }
+.similar-card:hover { box-shadow:var(--shadow-md); transform:translateY(-3px); }
+.similar-card img { width:100%; height:120px; object-fit:cover; }
+.similar-card-body { padding:0.7rem; }
+.similar-card-title { font-weight:700; font-size:0.85rem; margin-bottom:2px; }
+.similar-card-price { color:var(--green-700); font-weight:800; font-size:0.9rem; }
+@media(max-width:768px){
+  .product-layout { grid-template-columns:1fr; }
+  .similar-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand"><span class="logo-icon">🌾</span> Farm<span>Direct</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="listings.html" class="active">Products</a>
+      <a href="tracking.html">Track Order</a>
+      <a href="auth.html">Sign In</a>
+    </div>
+    <div class="nav-actions">
+      <a href="cart.html" class="cart-btn" id="navCartBtn"><i class="fa fa-shopping-basket"></i><span class="cart-badge" id="navCartCount">0</span></a>
+    </div>
+  </div>
+</nav>
+
+<section class="section-sm" style="background:var(--white);">
+  <div class="container">
+    <div class="breadcrumb" style="color:var(--gray-500);margin-bottom:2rem;">
+      <a href="index.html" style="color:var(--gray-500);">Home</a> <i class="fa fa-chevron-right"></i>
+      <a href="listings.html" style="color:var(--gray-500);">Products</a> <i class="fa fa-chevron-right"></i>
+      <span id="breadProduct" style="color:var(--gray-700);">Loading…</span>
+    </div>
+    <div class="product-layout" id="productLayout">
+      <div class="text-center" style="padding:4rem;grid-column:1/-1;">Loading…</div>
+    </div>
+  </div>
+</section>
+
+<!-- Reviews Section -->
+<section class="section-sm" style="background:var(--earth-50);" id="reviewsSection" style="display:none;">
+  <div class="container">
+    <h2 style="margin-bottom:2rem;">Reviews & Ratings</h2>
+    <div class="grid-2">
+      <div>
+        <div id="ratingBreakdown"></div>
+        <div id="reviewsList" style="display:flex;flex-direction:column;gap:1rem;"></div>
+        <div class="text-center mt-2" id="noReviews" style="display:none;">
+          <p class="text-muted">No reviews yet. Be the first to review!</p>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:1.8rem;">
+          <h3 style="margin-bottom:1.2rem;">Write a Review</h3>
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="reviewName" class="form-control" placeholder="Enter your name">
+          </div>
+          <div class="form-group">
+            <label>Rating</label>
+            <div class="rating-input" id="ratingInput">
+              <input type="radio" id="s5" name="rating" value="5"><label for="s5">★</label>
+              <input type="radio" id="s4" name="rating" value="4"><label for="s4">★</label>
+              <input type="radio" id="s3" name="rating" value="3"><label for="s3">★</label>
+              <input type="radio" id="s2" name="rating" value="2"><label for="s2">★</label>
+              <input type="radio" id="s1" name="rating" value="1"><label for="s1">★</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Your Review</label>
+            <textarea id="reviewText" class="form-control" rows="4" placeholder="Share your experience with this product…"></textarea>
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="submitReview()"><i class="fa fa-paper-plane"></i> Submit Review</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Similar Products -->
+<section class="section-sm" style="background:var(--white);">
+  <div class="container">
+    <h2 style="margin-bottom:1.5rem;">You Might Also Like</h2>
+    <div class="similar-grid" id="similarGrid"></div>
+  </div>
+</section>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js?v=2"></script>
+<script src="js/db.js?v=2"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const productId = params.get('id') || 'p1';
+let qty = 1;
+
+updateCartBadge();
+window.addEventListener('cartUpdated', updateCartBadge);
+
+async function renderProduct(){
+  const p = await getProduct(productId);
+  if(!p){ document.getElementById('productLayout').innerHTML='<p class="text-center" style="grid-column:1/-1;">Product not found.</p>'; return; }
+  const farmer = p.farmers || {};
+  document.title = p.name + ' – FarmDirect';
+  document.getElementById('breadProduct').textContent = p.name;
+
+  const marketPrice = Math.round(p.price * 1.35);
+  const saving = marketPrice - p.price;
+
+  document.getElementById('productLayout').innerHTML = `
+    <div class="product-img-main fade-in-up">
+      <img src="${p.image}" alt="${p.name}">
+    </div>
+    <div class="fade-in-up d2">
+      <div class="product-meta">
+        <span class="badge badge-green">${p.category}</span>
+        <span class="badge ${p.stock>50?'badge-green':'badge-amber'}">${p.stock>50?'In Stock':'Low Stock'}</span>
+      </div>
+      <h1 style="font-size:2rem;margin-bottom:0.6rem;">${p.name}</h1>
+      <div class="flex" style="align-items:center;gap:1rem;margin-bottom:1rem;">
+        <div class="stars">${renderStars(p.rating)}</div>
+        <span style="font-weight:600;color:var(--amber-600);">${p.rating}</span>
+        <span style="color:var(--gray-500);font-size:0.85rem;">${p.rating_count} reviews</span>
+      </div>
+      <div class="product-price-big">₹${p.price}<small>/${p.unit}</small></div>
+      <div class="product-savings">
+        <i class="fa fa-hand-holding-usd"></i>
+        <p>Market price ≈ <strong>₹${marketPrice}</strong>. You save <strong>₹${saving}/${p.unit}</strong> by buying direct!</p>
+      </div>
+      <a href="farmer-profile.html?id=${p.farmer_id}" class="farmer-info-card">
+        <img src="${farmer.avatar||''}" alt="${farmer.name||''}">
+        <div style="flex:1;">
+          <div class="farmer-name">${farmer.name||''}</div>
+          <div class="farmer-loc"><i class="fa fa-map-marker-alt"></i> ${farmer.location||''}</div>
+          <div class="farmer-rating">${renderStars(farmer.rating||0)} ${farmer.rating||0} (${farmer.reviews||0} reviews)</div>
+        </div>
+        <i class="fa fa-chevron-right" style="color:var(--green-400);"></i>
+      </a>
+      <div class="form-group">
+        <label style="font-weight:700;">Quantity</label>
+        <div class="qty-wrap">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <input class="qty-num" id="qtyNum" type="number" value="1" min="1" max="${p.stock}" readonly>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+        <button class="btn btn-primary" style="flex:1;" onclick="addToCart()"><i class="fa fa-shopping-basket"></i> Add to Cart</button>
+        <a href="cart.html" class="btn btn-amber" style="flex:1;" onclick="addToCart()"><i class="fa fa-bolt"></i> Buy Now</a>
+      </div>
+      <div style="background:var(--gray-50);border-radius:var(--radius-md);padding:1rem 1.2rem;">
+        <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+          <div style="font-size:0.82rem;color:var(--gray-500);"><i class="fa fa-truck text-green"></i> Next-day delivery</div>
+          <div style="font-size:0.82rem;color:var(--gray-500);"><i class="fa fa-undo text-green"></i> 24h fresh guarantee</div>
+          <div style="font-size:0.82rem;color:var(--gray-500);"><i class="fa fa-lock text-green"></i> Secure payment</div>
+        </div>
+      </div>
+    </div>`;
+
+  const tabsHtml = `
+    <div class="container" style="margin-top:2rem;">
+      <div class="tabs" style="max-width:480px;">
+        <button class="tab-btn active" onclick="switchTab('desc',this)">Description</button>
+        <button class="tab-btn" onclick="switchTab('nutrition',this)">Nutrition</button>
+        <button class="tab-btn" onclick="switchTab('certs',this)">Certifications</button>
+      </div>
+      <div class="tab-panel active" id="tab-desc"><p style="color:var(--gray-700);line-height:1.8;">${p.description}</p></div>
+      <div class="tab-panel" id="tab-nutrition"><p style="color:var(--gray-700);line-height:1.8;">${p.nutrition}</p></div>
+      <div class="tab-panel" id="tab-certs">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">${(farmer.certified||[]).map(c=>`<span class="badge badge-green"><i class="fa fa-certificate"></i> ${c}</span>`).join('')}</div>
+        <p style="margin-top:1rem;font-size:0.88rem;color:var(--gray-500);">This farmer and their produce are certified by the listed bodies.</p>
+      </div>
+    </div>`;
+  document.querySelector('.section-sm').insertAdjacentHTML('beforeend', tabsHtml);
+
+  await renderReviews(p.id);
+  await renderSimilar(p);
+  document.getElementById('reviewsSection').style.display='block';
+}
+
+function switchTab(id, btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+function changeQty(delta){
+  const p = getProduct(productId);
+  qty = Math.max(1, Math.min(p.stock, qty+delta));
+  document.getElementById('qtyNum').value = qty;
+}
+
+function addToCart(){ Cart.add(productId, qty); updateCartBadge(); showToast('Added '+qty+'x to cart! 🛒'); }
+
+async function renderReviews(pid){
+  const all = await getReviews(pid);
+  if(all.length===0){ document.getElementById('noReviews').style.display='block'; document.getElementById('ratingBreakdown').innerHTML=''; return; }
+  
+  const avgRating = (all.reduce((s,r)=>s+r.rating,0)/all.length).toFixed(1);
+  const counts=[5,4,3,2,1].map(n=>({ n, c:all.filter(r=>r.rating===n).length }));
+  
+  document.getElementById('ratingBreakdown').innerHTML=`
+    <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;">
+      <div style="text-align:center;">
+        <div style="font-family:var(--font-head);font-size:3.5rem;font-weight:800;color:var(--green-700);line-height:1;">${avgRating}</div>
+        <div class="stars">${renderStars(+avgRating)}</div>
+        <div style="font-size:0.78rem;color:var(--gray-500);margin-top:4px;">${all.length} reviews</div>
+      </div>
+      <div class="rating-breakdown" style="flex:1;">
+        ${counts.map(({n,c})=>`<div class="rating-row"><span style="min-width:8px;">${n}★</span><div class="rating-bar-wrap"><div class="rating-bar" style="width:${all.length?c/all.length*100:0}%"></div></div><span style="min-width:24px;color:var(--gray-500);">${c}</span></div>`).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('reviewsList').innerHTML = all.map(r=>`
+    <div class="review-card">
+      <div class="review-top">
+        <span class="reviewer">${r.user_name}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="stars">${renderStars(r.rating)}</div>
+          <span class="review-date">${r.created_at?.slice(0,10)||''}</span>
+        </div>
+      </div>
+      <p>${r.text}</p>
+    </div>`).join('');
+}
+
+async function submitReview(){
+  const name = document.getElementById('reviewName').value.trim();
+  const ratingEl = document.querySelector('input[name=rating]:checked');
+  const text = document.getElementById('reviewText').value.trim();
+  if(!name||!ratingEl||!text){ showToast('Please fill all fields','error'); return; }
+  const result = await submitReview({ productId, userName: name, rating: +ratingEl.value, text });
+  if(!result){ showToast('Failed to submit review','error'); return; }
+  document.getElementById('reviewName').value='';
+  document.querySelector('input[name=rating]:checked').checked=false;
+  document.getElementById('reviewText').value='';
+  await renderReviews(productId);
+  showToast('Review submitted! Thank you 🌟');
+}
+
+async function renderSimilar(p){
+  const products = await getProducts({category:p.category});
+  const similar = products.filter(x=>x.id!==p.id).slice(0,3);
+  document.getElementById('similarGrid').innerHTML = similar.map(sp=>`
+    <a href="product.html?id=${sp.id}" class="similar-card">
+      <img src="${sp.image}" alt="${sp.name}" loading="lazy">
+      <div class="similar-card-body">
+        <div class="similar-card-title">${sp.name}</div>
+        <div class="similar-card-price">₹${sp.price}/${sp.unit}</div>
+      </div>
+    </a>`).join('');
+}
+
+function showToast(msg,type=''){
+  const el=document.createElement('div'); el.className=`toast ${type}`; el.innerHTML=`<i class="fa ${type==='error'?'fa-exclamation-circle':'fa-check-circle'}"></i> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{ el.style.animation='slideOutRight 0.3s ease forwards'; setTimeout(()=>el.remove(),300); },2500);
+}
+
+renderProduct();
+</script>
+</body>
+</html>

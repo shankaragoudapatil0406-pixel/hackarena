@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmDirect – Fresh from Farm to Table</title>
+<meta name="description" content="FarmDirect connects you directly with local farmers. Buy fresh produce at fair prices, cutting out the middlemen.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── Hero ── */
+.hero { position: relative; min-height: 94vh; display: flex; align-items: center; overflow: hidden; }
+.hero-bg { position: absolute; inset: 0; z-index: 0; }
+.hero-bg img { width: 100%; height: 100%; object-fit: cover; }
+.hero-bg::after { content:''; position:absolute; inset:0; background: linear-gradient(120deg, rgba(13,35,24,.82) 0%, rgba(13,35,24,.45) 60%, rgba(13,35,24,.2) 100%); }
+.hero-content { position: relative; z-index: 1; color: #fff; max-width: 660px; }
+.hero-pretitle { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); backdrop-filter: blur(8px); padding: 6px 16px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--amber-400); margin-bottom: 1.4rem; }
+.hero h1 { font-size: clamp(2.4rem,5vw,4rem); color: #fff; margin-bottom: 1.2rem; }
+.hero h1 span { color: var(--amber-400); }
+.hero p { font-size: 1.12rem; color: rgba(255,255,255,.85); margin-bottom: 2rem; max-width: 520px; line-height: 1.75; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
+.hero-trust { display: flex; align-items: center; gap: 1.2rem; margin-top: 2.2rem; flex-wrap: wrap; }
+.hero-trust-item { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: rgba(255,255,255,.75); }
+.hero-trust-item i { color: var(--amber-400); }
+/* ── Stats ── */
+.stats-section { background: var(--white); border-bottom: 1px solid var(--gray-100); }
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); }
+.stat-item { text-align: center; padding: 2.2rem 1rem; border-right: 1px solid var(--gray-100); }
+.stat-item:last-child { border-right: none; }
+.stat-num { font-family: var(--font-head); font-size: 2.4rem; font-weight: 800; color: var(--green-600); display: block; }
+.stat-label { font-size: 0.82rem; color: var(--gray-500); margin-top: 4px; }
+/* ── How it works ── */
+.hiw-section { background: var(--earth-50); }
+.hiw-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+.hiw-card { background: var(--white); border-radius: var(--radius-lg); padding: 2.2rem 1.8rem; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100); transition: var(--transition); }
+.hiw-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
+.hiw-icon { width: 72px; height: 72px; border-radius: var(--radius-lg); background: linear-gradient(135deg, var(--green-500), var(--green-700)); color: #fff; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.3rem; box-shadow: 0 8px 20px rgba(46,105,64,.3); }
+.hiw-card h3 { margin-bottom: 0.6rem; }
+.hiw-card p { font-size: 0.88rem; color: var(--gray-500); line-height: 1.7; }
+.hiw-step { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--amber-500); color: #fff; font-size: 0.72rem; font-weight: 700; margin-bottom: 1rem; }
+/* ── Categories ── */
+.cat-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 1.2rem; }
+.cat-card { border-radius: var(--radius-lg); overflow: hidden; position: relative; height: 180px; cursor: pointer; }
+.cat-card img { width:100%; height:100%; object-fit:cover; transition: transform 0.5s ease; }
+.cat-card:hover img { transform: scale(1.08); }
+.cat-card::after { content:''; position:absolute; inset:0; background: linear-gradient(to top, rgba(0,0,0,.65) 0%, rgba(0,0,0,.1) 60%); }
+.cat-card-label { position:absolute; bottom:0; left:0; right:0; z-index:1; padding:1rem 0.8rem 0.8rem; color:#fff; font-family: var(--font-head); font-weight:700; font-size:1rem; }
+.cat-card-label small { display:block; font-size:0.72rem; font-weight:400; opacity:0.8; }
+/* ── Featured products ── */
+.featured-section { background: var(--white); }
+/* ── Testimonials ── */
+.testimonials-section { background: linear-gradient(135deg, var(--green-800), var(--green-600)); }
+.testimonials-section .section-title h2 { color: #fff; }
+.testimonials-section .section-title p { color: rgba(255,255,255,.7); }
+.testimonial-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+.testimonial-card { background: rgba(255,255,255,.10); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.15); border-radius: var(--radius-lg); padding: 1.8rem; color: #fff; }
+.testimonial-card p { font-size: 0.92rem; line-height: 1.75; color: rgba(255,255,255,.88); margin-bottom: 1.2rem; }
+.testimonial-reviewer { display: flex; align-items: center; gap: 12px; }
+.testimonial-reviewer img { width: 42px; height: 42px; border-radius: 50%; object-fit:cover; border: 2px solid rgba(255,255,255,.3); }
+.testimonial-reviewer strong { display: block; font-size: 0.9rem; }
+.testimonial-reviewer small { color: rgba(255,255,255,.6); font-size: 0.78rem; }
+/* ── CTA banner ── */
+.cta-section { background: var(--amber-500); }
+.cta-inner { display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+.cta-section h2 { color: var(--earth-900); margin-bottom: 0.5rem; }
+.cta-section p { color: var(--earth-700); max-width: 500px; }
+@media(max-width:768px){
+  .stats-grid, .hiw-grid, .cat-grid, .testimonial-grid { grid-template-columns: repeat(2,1fr); }
+  .stat-item { border-right: none; border-bottom: 1px solid var(--gray-100); }
+  .cta-inner { flex-direction: column; text-align: center; }
+}
+@media(max-width:480px){
+  .cat-grid { grid-template-columns: repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand"><span class="logo-icon">🌾</span> Farm<span>Direct</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="listings.html">Products</a>
+      <a href="tracking.html">Track Order</a>
+      <a href="auth.html">Sign In</a>
+    </div>
+    <div class="nav-actions">
+      <a href="cart.html" class="cart-btn" id="navCartBtn" title="Cart"><i class="fa fa-shopping-basket"></i><span class="cart-badge" id="navCartCount">0</span></a>
+      <a href="auth.html" class="btn btn-amber btn-sm">Register</a>
+    </div>
+    <button class="hamburger" onclick="toggleMobileNav()"><i class="fa fa-bars"></i></button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <img src="assets/hero_farm.png" alt="Fresh farm produce">
+  </div>
+  <div class="container">
+    <div class="hero-content fade-in-up">
+      <div class="hero-pretitle"><i class="fa fa-leaf"></i> 100% Farmer Direct</div>
+      <h1>Fresh Produce,<br><span>Fair Prices</span> – Direct from Farm</h1>
+      <p>We eliminate the middlemen, so farmers earn more and you pay less. Shop seasonal, local produce harvested just for you.</p>
+      <div class="hero-actions">
+        <a href="listings.html" class="btn btn-amber"><i class="fa fa-store"></i> Browse Products</a>
+        <a href="auth.html" class="btn btn-secondary"><i class="fa fa-tractor"></i> Register as Farmer</a>
+      </div>
+      <div class="hero-trust">
+        <div class="hero-trust-item"><i class="fa fa-shield-alt"></i> Verified Farmers</div>
+        <div class="hero-trust-item"><i class="fa fa-truck"></i> Next-Day Delivery</div>
+        <div class="hero-trust-item"><i class="fa fa-leaf"></i> Organic Certified</div>
+        <div class="hero-trust-item"><i class="fa fa-star"></i> 4.8★ Avg Rating</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item fade-in-up d1"><span class="stat-num counter" data-target="1240">0</span><div class="stat-label"><i class="fa fa-tractor text-green"></i> Registered Farmers</div></div>
+      <div class="stat-item fade-in-up d2"><span class="stat-num counter" data-target="8600">0</span><div class="stat-label"><i class="fa fa-box-open text-green"></i> Product Listings</div></div>
+      <div class="stat-item fade-in-up d3"><span class="stat-num counter" data-target="52000">0</span><div class="stat-label"><i class="fa fa-shopping-bag text-green"></i> Orders Delivered</div></div>
+      <div class="stat-item fade-in-up d4"><span class="stat-num counter" data-target="48">0</span><div class="stat-label"><i class="fa fa-map-marker-alt text-green"></i> Cities Covered</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section hiw-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>How FarmDirect Works</h2>
+      <p>A transparent, simple process that benefits both farmers and consumers</p>
+    </div>
+    <div class="hiw-grid">
+      <div class="hiw-card fade-in-up d1">
+        <div class="hiw-step">1</div>
+        <div class="hiw-icon"><i class="fa fa-search"></i></div>
+        <h3>Browse & Compare</h3>
+        <p>Discover fresh produce from verified local farmers. Compare prices and quality side-by-side to make informed decisions.</p>
+      </div>
+      <div class="hiw-card fade-in-up d2">
+        <div class="hiw-step">2</div>
+        <div class="hiw-icon"><i class="fa fa-shopping-cart"></i></div>
+        <h3>Order Directly</h3>
+        <p>Place your order directly with the farmer. No middlemen, no markups. Your money goes straight to the source.</p>
+      </div>
+      <div class="hiw-card fade-in-up d3">
+        <div class="hiw-step">3</div>
+        <div class="hiw-icon"><i class="fa fa-truck"></i></div>
+        <h3>Track & Receive</h3>
+        <p>Track your order in real-time as it travels from the farm to your doorstep. Fresh, fast, and fully transparent.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section section-sm" style="background:var(--white);">
+  <div class="container">
+    <div class="section-title">
+      <h2>Shop by Category</h2>
+      <p>From the field to your plate – choose from our fresh categories</p>
+    </div>
+    <div class="cat-grid">
+      <a href="listings.html?cat=Vegetables" class="cat-card">
+        <img src="assets/cat_vegetables.png" alt="Vegetables">
+        <div class="cat-card-label">Vegetables<small>65+ products</small></div>
+      </a>
+      <a href="listings.html?cat=Fruits" class="cat-card">
+        <img src="assets/cat_fruits.png" alt="Fruits">
+        <div class="cat-card-label">Fruits<small>48+ products</small></div>
+      </a>
+      <a href="listings.html?cat=Grains" class="cat-card">
+        <img src="assets/cat_grains.png" alt="Grains & Pulses">
+        <div class="cat-card-label">Grains & Pulses<small>32+ products</small></div>
+      </a>
+      <a href="listings.html?cat=Dairy" class="cat-card">
+        <img src="assets/cat_dairy.png" alt="Dairy">
+        <div class="cat-card-label">Dairy<small>24+ products</small></div>
+      </a>
+      <a href="listings.html?cat=Herbs" class="cat-card" style="background: linear-gradient(135deg,#2e6940,#52a869);">
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:3.5rem;">🌿</div>
+        <div class="cat-card-label">Herbs & Spices<small>40+ products</small></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="section featured-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Top-Rated Products</h2>
+      <p>Handpicked by our community – the freshest and highest-rated produce this week</p>
+    </div>
+    <div class="grid-4" id="featuredGrid"></div>
+    <div class="text-center mt-3">
+      <a href="listings.html" class="btn btn-primary"><i class="fa fa-th-large"></i> View All Products</a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section testimonials-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>What Our Community Says</h2>
+      <p>Hear from farmers and consumers who are changing the food supply chain</p>
+    </div>
+    <div class="testimonial-grid">
+      <div class="testimonial-card fade-in-up d1">
+        <div class="stars mb-1"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span></div>
+        <p>"FarmDirect changed my life. I now earn 40% more because I sell directly to consumers. No more broker exploitation!"</p>
+        <div class="testimonial-reviewer"><img src="https://i.pravatar.cc/80?img=11" alt="Rajesh"><div><strong>Rajesh Kumar</strong><small>🌾 Farmer · Nashik</small></div></div>
+      </div>
+      <div class="testimonial-card fade-in-up d2">
+        <div class="stars mb-1"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span></div>
+        <p>"The tomatoes I got were picked yesterday! You simply can't get this freshness from a supermarket. Prices are unbeatable."</p>
+        <div class="testimonial-reviewer"><img src="https://i.pravatar.cc/80?img=25" alt="Meera"><div><strong>Meera Sharma</strong><small>🛒 Consumer · Pune</small></div></div>
+      </div>
+      <div class="testimonial-card fade-in-up d3">
+        <div class="stars mb-1"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star half">★</span></div>
+        <p>"Knowing exactly which farmer grew my food and tracking the delivery is incredible. This is the future of food shopping."</p>
+        <div class="testimonial-reviewer"><img src="https://i.pravatar.cc/80?img=38" alt="Arjun"><div><strong>Arjun Menon</strong><small>🛒 Consumer · Bengaluru</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="section cta-section">
+  <div class="container">
+    <div class="cta-inner">
+      <div>
+        <h2>Are You a Farmer?</h2>
+        <p>Join 1,240+ farmers who are earning fair prices by selling directly to consumers across India. Free to list, no commission.</p>
+      </div>
+      <a href="auth.html" class="btn btn-primary" style="white-space:nowrap;"><i class="fa fa-tractor"></i> List Your Products Free</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">🌾 Farm<span>Direct</span></div>
+        <p>Bridging the gap between farmers and consumers. Fair prices, fresh produce, no middlemen.</p>
+        <div class="social-links">
+          <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4>Marketplace</h4>
+        <ul>
+          <li><a href="listings.html">Browse Products</a></li>
+          <li><a href="listings.html?cat=Vegetables">Vegetables</a></li>
+          <li><a href="listings.html?cat=Fruits">Fruits</a></li>
+          <li><a href="listings.html?cat=Dairy">Dairy</a></li>
+          <li><a href="listings.html?cat=Grains">Grains</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>For Farmers</h4>
+        <ul>
+          <li><a href="auth.html">Register Farm</a></li>
+          <li><a href="#">Farmer Dashboard</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Success Stories</a></li>
+          <li><a href="#">Support</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Our Mission</a></li>
+          <li><a href="tracking.html">Track Order</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 FarmDirect. Built for Hackarena.</span>
+      <span style="color:rgba(255,255,255,.4);">🌱 Growing Fair Trade, One Farm at a Time</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js?v=2"></script>
+<script src="js/db.js?v=2"></script>
+<script>
+// Cart badge
+updateCartBadge();
+window.addEventListener('cartUpdated', updateCartBadge);
+
+// Counter animation
+function animateCounters(){
+  document.querySelectorAll('.counter').forEach(el=>{
+    const target = +el.dataset.target;
+    let current = 0;
+    const step = target / 70;
+    const interval = setInterval(()=>{
+      current = Math.min(current + step, target);
+      el.textContent = Math.floor(current).toLocaleString('en-IN');
+      if(current >= target) clearInterval(interval);
+    },18);
+  });
+}
+const observer = new IntersectionObserver(entries=>{ entries.forEach(e=>{ if(e.isIntersecting){ animateCounters(); observer.disconnect(); } }); });
+observer.observe(document.querySelector('.stats-section'));
+
+// Featured products
+async function renderFeatured(){
+  const products = await getProducts({sort:'rating'});
+  const top8 = products.slice(0,8);
+  const grid = document.getElementById('featuredGrid');
+  grid.innerHTML = top8.map(p=>{
+    const farmer = p.farmers;
+    return `<div class="card product-card fade-in-up">
+      <div class="card-img-wrap">
+        <img src="${p.image}" alt="${p.name}" loading="lazy">
+        <span class="badge badge-green card-cat">${p.category}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${p.name}</div>
+        <div class="card-farmer"><img src="${farmer?.avatar||''}" alt="${farmer?.name||''}"><span>${farmer?.name||''}</span></div>
+        <div class="card-rating">${renderStars(p.rating)} <span>(${p.rating_count})</span></div>
+        <div class="card-footer">
+          <div class="card-price">₹${p.price}<small>/${p.unit}</small></div>
+          <button class="btn btn-primary btn-sm" onclick="addToCartFromHome('${p.id}')"><i class="fa fa-plus"></i> Add</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+renderFeatured();
+
+function addToCartFromHome(id){
+  Cart.add(id,1);
+  updateCartBadge();
+  showToast('Added to cart! 🛒');
+}
+
+function showToast(msg, type=''){
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<i class="fa fa-check-circle"></i> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{ el.style.animation='slideOutRight 0.3s ease forwards'; setTimeout(()=>el.remove(),300); }, 2500);
+}
+
+function toggleMobileNav(){
+  const nl = document.querySelector('.nav-links');
+  nl.style.display = nl.style.display === 'flex' ? 'none' : 'flex';
+  nl.style.flexDirection = 'column';
+  nl.style.position = 'absolute';
+  nl.style.top = '68px';
+  nl.style.left = '0'; nl.style.right = '0';
+  nl.style.background = 'var(--green-900)';
+  nl.style.padding = '1rem 1.5rem';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart & Checkout – FarmDirect</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.cart-layout { display:grid; grid-template-columns:1fr 380px; gap:2rem; align-items:start; }
+.cart-item { display:flex; gap:1.2rem; padding:1.2rem; background:var(--white); border-radius:var(--radius-md); border:1px solid var(--gray-100); transition:var(--transition); }
+.cart-item:hover { box-shadow:var(--shadow-sm); }
+.cart-item img { width:80px; height:80px; object-fit:cover; border-radius:var(--radius-sm); flex-shrink:0; }
+.cart-item-body { flex:1; }
+.cart-item-name { font-weight:700; font-size:0.95rem; margin-bottom:3px; }
+.cart-item-farmer { font-size:0.78rem; color:var(--gray-500); margin-bottom:8px; }
+.cart-item-actions { display:flex; align-items:center; justify-content:space-between; }
+.cart-item-price { font-family:var(--font-head); font-weight:800; font-size:1.1rem; color:var(--green-700); }
+.qty-wrap { display:flex; align-items:center; gap:0; border:1.5px solid var(--gray-200); border-radius:var(--radius-sm); overflow:hidden; }
+.qty-btn { width:30px; height:30px; background:var(--gray-100); border:none; font-size:1rem; cursor:pointer; transition:var(--transition); display:flex;align-items:center;justify-content:center; }
+.qty-btn:hover { background:var(--green-100); }
+.qty-num { width:36px; text-align:center; font-weight:700; font-size:0.9rem; border:none; padding:0; }
+.remove-btn { background:none; border:none; color:var(--gray-400); font-size:1rem; cursor:pointer; transition:var(--transition); }
+.remove-btn:hover { color:#e53e3e; }
+.order-summary { background:var(--white); border-radius:var(--radius-lg); border:1px solid var(--gray-100); padding:1.5rem; position:sticky; top:84px; }
+.summary-row { display:flex; justify-content:space-between; padding:0.5rem 0; font-size:0.9rem; }
+.summary-row.total { font-family:var(--font-head); font-weight:800; font-size:1.2rem; border-top:2px solid var(--gray-100); margin-top:0.5rem; padding-top:0.8rem; color:var(--green-700); }
+.empty-cart { text-align:center; padding:5rem 2rem; }
+.empty-cart i { font-size:4rem; color:var(--gray-200); margin-bottom:1rem; display:block; }
+/* Checkout */
+.checkout-section { display:none; }
+.checkout-section.visible { display:block; }
+/* Success */
+.success-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:3000; display:none; align-items:center; justify-content:center; }
+.success-overlay.show { display:flex; }
+.success-card { background:var(--white); border-radius:var(--radius-xl); padding:3rem; max-width:480px; width:100%; text-align:center; animation:fadeInUp 0.5s ease; }
+.success-icon { width:90px; height:90px; border-radius:50%; background:var(--green-100); color:var(--green-600); font-size:2.5rem; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; animation:pulse 1s ease; }
+.success-card h2 { color:var(--green-800); margin-bottom:0.75rem; }
+.success-card p { color:var(--gray-500); font-size:0.92rem; }
+.order-id-box { background:var(--green-50); border:1.5px dashed var(--green-300); border-radius:var(--radius-md); padding:1rem 1.5rem; margin:1.5rem 0; }
+.order-id-box strong { font-family:var(--font-head); font-size:1.4rem; color:var(--green-700); letter-spacing:0.1em; }
+.slot-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+.slot-btn { padding:0.6rem; border:1.5px solid var(--gray-200); border-radius:var(--radius-sm); background:var(--white); font-size:0.84rem; cursor:pointer; transition:var(--transition); text-align:center; }
+.slot-btn:hover,.slot-btn.active { border-color:var(--green-500); background:var(--green-50); color:var(--green-700); font-weight:600; }
+@media(max-width:768px){ .cart-layout { grid-template-columns:1fr; } .order-summary { position:static; } }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand"><span class="logo-icon">🌾</span> Farm<span>Direct</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="listings.html">Products</a><a href="tracking.html">Track Order</a><a href="auth.html">Sign In</a>
+    </div>
+    <div class="nav-actions">
+      <a href="cart.html" class="cart-btn" style="background:rgba(255,255,255,.2);"><i class="fa fa-shopping-basket"></i><span class="cart-badge" id="navCartCount">0</span></a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> <i class="fa fa-chevron-right"></i> Cart</div>
+    <h1>Your Cart</h1>
+  </div>
+</div>
+
+<section class="section-sm">
+  <div class="container">
+    <div id="emptyCart" class="empty-cart" style="display:none;">
+      <i class="fa fa-shopping-basket"></i>
+      <h3>Your cart is empty</h3>
+      <p class="text-muted mt-1">Add some fresh produce to get started!</p>
+      <a href="listings.html" class="btn btn-primary mt-2"><i class="fa fa-store"></i> Browse Products</a>
+    </div>
+
+    <div class="cart-layout" id="cartLayout">
+      <!-- Cart Items -->
+      <div>
+        <div class="flex-between mb-2">
+          <h3 id="cartItemCount"></h3>
+          <button class="btn btn-ghost btn-sm" onclick="clearAllCart()"><i class="fa fa-trash"></i> Clear All</button>
+        </div>
+        <div id="cartItems" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
+      </div>
+
+      <!-- Order Summary -->
+      <div>
+        <div class="order-summary">
+          <h3 style="margin-bottom:1.2rem;">Order Summary</h3>
+          <div class="summary-row"><span>Subtotal</span><span id="summarySubtotal">₹0</span></div>
+          <div class="summary-row"><span>Delivery Fee</span><span id="summaryDelivery">₹40</span></div>
+          <div class="summary-row"><span>Farmer Direct Discount</span><span style="color:var(--green-600);" id="summaryDiscount">-₹0</span></div>
+          <div class="summary-row total"><span>Total</span><span id="summaryTotal">₹0</span></div>
+          <button class="btn btn-primary" style="width:100%;margin-top:1.2rem;" onclick="showCheckout()"><i class="fa fa-credit-card"></i> Proceed to Checkout</button>
+          <a href="listings.html" class="btn btn-ghost" style="width:100%;margin-top:0.5rem;text-align:center;"><i class="fa fa-plus"></i> Add More Items</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checkout Form -->
+    <div class="checkout-section card" id="checkoutSection" style="padding:2rem;margin-top:2rem;">
+      <h2 style="margin-bottom:1.5rem;"><i class="fa fa-map-marker-alt text-green"></i> Delivery Details</h2>
+      <div class="form-row">
+        <div class="form-group"><label>Full Name</label><input type="text" id="coName" class="form-control" placeholder="Your full name" value="Priya Sharma"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="coPhone" class="form-control" placeholder="10-digit mobile" value="9876543210"></div>
+      </div>
+      <div class="form-group"><label>Full Address</label><textarea id="coAddress" class="form-control" rows="2" placeholder="Flat no., building, street, landmark">12, Green Valley Apartments, MG Road, Pune – 411001</textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>City</label><input type="text" id="coCity" class="form-control" value="Pune"></div>
+        <div class="form-group"><label>Pincode</label><input type="text" id="coPin" class="form-control" value="411001"></div>
+      </div>
+      <div class="form-group">
+        <label>Delivery Slot</label>
+        <div class="slot-grid" id="slotGrid">
+          <button class="slot-btn active" onclick="selectSlot(this,'7am-10am')">🌅 7am – 10am</button>
+          <button class="slot-btn" onclick="selectSlot(this,'10am-1pm')">🌤 10am – 1pm</button>
+          <button class="slot-btn" onclick="selectSlot(this,'2pm-5pm')">⛅ 2pm – 5pm</button>
+          <button class="slot-btn" onclick="selectSlot(this,'5pm-8pm')">🌆 5pm – 8pm</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Payment Mode</label>
+        <select class="form-control" id="coPayment">
+          <option>Cash on Delivery</option>
+          <option>UPI / Google Pay</option>
+          <option>Net Banking</option>
+          <option>Debit/Credit Card</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <button class="btn btn-primary" style="flex:1;" onclick="submitOrder()"><i class="fa fa-check-circle"></i> Place Order</button>
+        <button class="btn btn-secondary" onclick="hideCheckout()">Back to Cart</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Success Overlay -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon"><i class="fa fa-check"></i></div>
+    <h2>Order Placed! 🎉</h2>
+    <p>Your fresh produce is on its way from the farm.</p>
+    <div class="order-id-box">
+      <div style="font-size:0.78rem;color:var(--gray-500);margin-bottom:4px;">ORDER ID</div>
+      <strong id="successOrderId">—</strong>
+    </div>
+    <p style="font-size:0.82rem;margin-bottom:1.5rem;">Save your order ID to track delivery.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a id="trackOrderBtn" href="tracking.html" class="btn btn-primary"><i class="fa fa-truck"></i> Track Order</a>
+      <a href="listings.html" class="btn btn-secondary">Continue Shopping</a>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/db.js"></script>
+<script>
+updateCartBadge();
+window.addEventListener('cartUpdated', ()=>{ updateCartBadge(); renderCart(); });
+
+async function renderCart(){
+  const items = Cart.get();
+  const cartLayout = document.getElementById('cartLayout');
+  const emptyCart = document.getElementById('emptyCart');
+  if(items.length===0){ cartLayout.style.display='none'; emptyCart.style.display='block'; document.getElementById('checkoutSection').classList.remove('visible'); return; }
+  cartLayout.style.display='grid'; emptyCart.style.display='none';
+  document.getElementById('cartItemCount').textContent = `${items.length} item${items.length>1?'s':''} in cart`;
+  const cartItemsHtml = await Promise.all(items.map(async item=>{
+    const p = await getProduct(item.productId);
+    if(!p) return '';
+    const farmer = p.farmers || {};
+    return `<div class="cart-item">
+      <img src="${p.image}" alt="${p.name}">
+      <div class="cart-item-body">
+        <div class="cart-item-name"><a href="product.html?id=${p.id}" style="color:inherit;">${p.name}</a></div>
+        <div class="cart-item-farmer">By ${farmer.name||''} · ${farmer.location||''}</div>
+        <div class="cart-item-actions">
+          <div class="qty-wrap">
+            <button class="qty-btn" onclick="updateQty('${p.id}',-1)">−</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="updateQty('${p.id}',1)">+</button>
+          </div>
+          <span class="cart-item-price">₹${p.price*item.qty}</span>
+          <button class="remove-btn" onclick="removeItem('${p.id}')"><i class="fa fa-trash"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }));
+  document.getElementById('cartItems').innerHTML = cartItemsHtml.join('');
+  await updateSummary(items);
+}
+
+function updateQty(pid, delta){ const item=Cart.get().find(i=>i.productId===pid); if(item) Cart.update(pid, item.qty+delta); }
+function removeItem(pid){ Cart.remove(pid); showToast('Item removed'); }
+function clearAllCart(){ Cart.clear(); showToast('Cart cleared'); }
+
+async function updateSummary(items){
+  let subtotal = 0;
+  for (const item of items) {
+    const p = await getProduct(item.productId);
+    if (p) subtotal += p.price * item.qty;
+  }
+  const delivery = 0;
+  const discount = Math.round(subtotal * 0.10);
+  const total    = subtotal + delivery - discount;
+  document.getElementById('summarySubtotal').textContent = '₹'+subtotal;
+  document.getElementById('summaryDelivery').textContent = '<span style="color:var(--green-600);font-weight:bold;">Free</span>';
+  document.getElementById('summaryDelivery').innerHTML = '<span style="color:var(--green-600);font-weight:bold;">Free</span>';
+  document.getElementById('summaryDiscount').textContent = '-₹'+discount;
+  document.getElementById('summaryTotal').textContent    = '₹'+total;
+}
+
+function showCheckout(){ if(Cart.count()===0) return; document.getElementById('checkoutSection').classList.add('visible'); document.getElementById('checkoutSection').scrollIntoView({behavior:'smooth'}); }
+function hideCheckout(){ document.getElementById('checkoutSection').classList.remove('visible'); }
+
+let selectedSlot = '7am-10am';
+function selectSlot(btn, slot){ document.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); selectedSlot=slot; }
+
+async function submitOrder(){
+  const name    = document.getElementById('coName').value.trim();
+  const phone   = document.getElementById('coPhone').value.trim();
+  const address = document.getElementById('coAddress').value.trim();
+  const city    = document.getElementById('coCity').value.trim();
+  const pin     = document.getElementById('coPin').value.trim();
+  if(!name||!phone||!address||!city||!pin){ showToast('Please fill all delivery details','error'); return; }
+  const subtotalEl = document.getElementById('summarySubtotal').textContent.replace('₹','');
+  const items = Cart.get().map(i=>({ productId:i.productId, qty:i.qty, price:0 }));
+  const orderId = await placeOrder({ name, phone, address:address+', '+city+' '+pin, slot:selectedSlot, payment:document.getElementById('coPayment').value, items, total:+subtotalEl-Math.round(+subtotalEl*.10) });
+  if(!orderId){ showToast('Failed to place order. Please try again.','error'); return; }
+  Cart.clear();
+  document.getElementById('successOrderId').textContent = orderId;
+  document.getElementById('trackOrderBtn').href = 'tracking.html?id='+orderId;
+  document.getElementById('successOverlay').classList.add('show');
+}
+
+function showToast(msg,type=''){
+  const el=document.createElement('div'); el.className=`toast ${type}`; el.innerHTML=`<i class="fa ${type==='error'?'fa-exclamation-circle':'fa-check-circle'}"></i> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{ el.style.animation='slideOutRight 0.3s ease forwards'; setTimeout(()=>el.remove(),300); },2500);
+}
+
+renderCart();
+</script>
+</body>
+</html>

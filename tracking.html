@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Order – FarmDirect</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.tracking-search { background:var(--white); border-radius:var(--radius-xl); padding:2.5rem; box-shadow:var(--shadow-lg); max-width:600px; margin:0 auto; }
+.tracking-search h2 { margin-bottom:1rem; }
+.search-row { display:flex; gap:1rem; }
+.search-row input { flex:1; }
+.track-result { max-width:760px; margin:3rem auto 0; }
+.order-header { background:var(--white); border-radius:var(--radius-lg); padding:1.5rem 2rem; border:1px solid var(--gray-100); margin-bottom:2rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; }
+.order-header h3 { margin-bottom:4px; }
+.order-header p { font-size:0.84rem; color:var(--gray-500); }
+.status-badge { font-family:var(--font-head); font-size:1rem; font-weight:700; }
+.tracking-card { background:var(--white); border-radius:var(--radius-lg); padding:2rem; border:1px solid var(--gray-100); }
+.eta-banner { background:linear-gradient(135deg,var(--amber-500),var(--amber-600)); color:#fff; border-radius:var(--radius-lg); padding:1.5rem 2rem; margin-bottom:2rem; display:flex;align-items:center;gap:1.5rem; }
+.eta-banner i { font-size:2.5rem; opacity:.9; }
+.eta-banner strong { font-family:var(--font-head); font-size:1.4rem; display:block; }
+.eta-banner small { font-size:0.85rem; opacity:.85; }
+.order-items-mini { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:0.75rem; }
+.order-item-mini { border:1px solid var(--gray-100); border-radius:var(--radius-md); overflow:hidden; }
+.order-item-mini img { width:100%; height:70px; object-fit:cover; }
+.order-item-mini div { padding:0.4rem 0.6rem; font-size:0.75rem; font-weight:600; }
+.not-found { text-align:center; padding:3rem; }
+.not-found i { font-size:3.5rem; color:var(--gray-300); display:block; margin-bottom:1rem; }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand"><span class="logo-icon">🌾</span> Farm<span>Direct</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="listings.html">Products</a><a href="tracking.html" class="active">Track Order</a><a href="auth.html">Sign In</a>
+    </div>
+    <div class="nav-actions">
+      <a href="cart.html" class="cart-btn"><i class="fa fa-shopping-basket"></i><span class="cart-badge" id="navCartCount">0</span></a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> <i class="fa fa-chevron-right"></i> Track Order</div>
+    <h1>Track Your Order</h1>
+    <p>Enter your order ID to see real-time delivery status</p>
+  </div>
+</div>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="tracking-search">
+      <h2><i class="fa fa-search text-green"></i> Enter Order ID</h2>
+      <p class="text-muted" style="margin-bottom:1.2rem;">Your order ID was shown after checkout. It starts with "FD".</p>
+      <div class="search-row">
+        <input type="text" class="form-control" id="orderIdInput" placeholder="e.g. FD12345678">
+        <button class="btn btn-primary" onclick="trackOrder()"><i class="fa fa-truck"></i> Track</button>
+      </div>
+      <div id="recentOrders" style="margin-top:1.2rem;"></div>
+    </div>
+
+    <div id="trackResult" style="display:none;" class="track-result"></div>
+  </div>
+</section>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/db.js"></script>
+<script>
+const urlParams = new URLSearchParams(location.search);
+const urlId = urlParams.get('id');
+if(urlId) { document.getElementById('orderIdInput').value = urlId; }
+
+function updateCartBadge(){ const c=Cart.count(); document.getElementById('navCartCount').textContent=c; document.getElementById('navCartCount').style.display=c>0?'flex':'none'; }
+updateCartBadge();
+
+const STEP_CONFIG = [
+  { icon:'fa-clipboard-check', label:'Order Placed',      desc:'We received your order and sent it to the farmer.', key:'placed' },
+  { icon:'fa-tractor',         label:'Farmer Confirmed',  desc:'The farmer has confirmed and started harvesting your order.', key:'confirmed' },
+  { icon:'fa-box',             label:'Packed',            desc:'Your produce has been freshly packed and is ready for pickup.', key:'packed' },
+  { icon:'fa-truck',           label:'Out for Delivery',  desc:'Your order is on the way to your location!', key:'outForDelivery' },
+  { icon:'fa-home',            label:'Delivered',         desc:'Your fresh produce has been delivered. Enjoy!', key:'delivered' },
+];
+
+async function trackOrder(){
+  const id = document.getElementById('orderIdInput').value.trim().toUpperCase();
+  if(!id){ showToast('Please enter an order ID','error'); return; }
+  const order = await getOrder(id);
+  const resultDiv = document.getElementById('trackResult');
+  resultDiv.style.display = 'block';
+  if(!order){ resultDiv.innerHTML=`<div class="not-found"><i class="fa fa-box-open"></i><h3>Order Not Found</h3><p class="text-muted">No order found with ID <strong>${id}</strong>. Please check and try again.</p><button class="btn btn-primary mt-2" onclick="loadDemo()"><i class="fa fa-eye"></i> View Demo Order</button></div>`; resultDiv.scrollIntoView({behavior:'smooth'}); return; }
+  renderTracking(order);
+  resultDiv.scrollIntoView({behavior:'smooth'});
+}
+
+async function loadDemo(){
+  const demoItems = [{ productId:'p1', qty:2, price:45 },{ productId:'p11', qty:1, price:180 }];
+  const oid = await placeOrder({ name:'Demo User', phone:'9999999999', address:'Demo Address, Demo City', slot:'7am-10am', payment:'Cash on Delivery', items:demoItems, total:310 });
+  if(!oid){ showToast('Demo order failed','error'); return; }
+  document.getElementById('orderIdInput').value = oid;
+  trackOrder();
+}
+
+function renderTracking(order){
+  const currentStep = order.current_step || 0;
+  const isDelivered = currentStep >= 4;
+  const placedMs   = new Date(order.placed_at).getTime();
+  const etaDate    = new Date(placedMs + 5*3600000);
+
+  const timelineHtml = STEP_CONFIG.map((s,i)=>{
+    const isDone   = i < currentStep;
+    const isActive = i === currentStep;
+    const isLast   = i === STEP_CONFIG.length-1;
+    return `<div class="timeline-item">
+      <div class="timeline-dot-wrap">
+        <div class="timeline-dot ${isDone?'done':isActive?'active':''}">
+          <i class="fa ${s.icon}"></i>
+        </div>
+        ${!isLast?`<div class="timeline-line ${isDone?'done':''}"></div>`:''}
+      </div>
+      <div class="timeline-content">
+        <h4 style="color:${isDone||isActive?'var(--green-800)':'var(--gray-400)'}">${s.label}</h4>
+        <p style="color:${isDone||isActive?'var(--gray-500)':'var(--gray-300)'}">${s.desc}</p>
+      </div>
+    </div>`;
+  }).join('');
+
+  const items = (order.order_items||[]).map(item=>{
+    const p = item.products;
+    return p?`<div class="order-item-mini"><img src="${p.image}" alt="${p.name}" loading="lazy"><div>${p.name} x${item.qty}</div></div>`:'';
+  }).join('');
+
+  document.getElementById('trackResult').innerHTML = `
+    <div class="order-header">
+      <div>
+        <h3>Order #${order.id}</h3>
+        <p>Placed for ${order.name} · ${order.slot} slot · ${order.payment}</p>
+        <p><i class="fa fa-map-marker-alt text-green"></i> ${order.address}</p>
+      </div>
+      <div class="status-badge badge badge-${isDelivered?'green':'amber'}" style="font-size:0.88rem;padding:8px 18px;">
+        <i class="fa fa-${isDelivered?'check-circle':'truck'}"></i>
+        ${isDelivered?'Delivered':STEP_CONFIG[currentStep]?.label||'Processing'}
+      </div>
+    </div>
+
+    ${!isDelivered?`<div class="eta-banner">
+      <i class="fa fa-clock"></i>
+      <div><strong>Estimated Delivery: ${etaDate.toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})}</strong><small>Delivery within the ${order.slot} slot</small></div>
+    </div>`:`<div class="eta-banner" style="background:linear-gradient(135deg,var(--green-600),var(--green-800));">
+      <i class="fa fa-check-circle"></i>
+      <div><strong>Delivered Successfully!</strong><small>Thank you for supporting local farmers 🌾</small></div>
+    </div>`}
+
+    <div class="tracking-card">
+      <h3 style="margin-bottom:1.8rem;">Delivery Progress</h3>
+      <div class="timeline">${timelineHtml}</div>
+    </div>
+
+    ${items?`<div class="tracking-card" style="margin-top:1.5rem;">
+      <h3 style="margin-bottom:1rem;">Items in This Order</h3>
+      <div class="order-items-mini">${items}</div>
+    </div>`:''}
+    
+    <div class="text-center mt-2">
+      <a href="listings.html" class="btn btn-primary"><i class="fa fa-store"></i> Continue Shopping</a>
+    </div>`;
+}
+
+// Show recent orders
+async function showRecentOrders(){
+  const user = Auth.getUser();
+  if(!user) return;
+  const orders = await getUserOrders(user.email);
+  if(!orders || orders.length===0) return;
+  document.getElementById('recentOrders').innerHTML = `<div style="font-size:0.82rem;color:var(--gray-500);margin-bottom:8px;">Recent Orders:</div>
+    ${orders.map(o=>`<button onclick="quickTrack('${o.id}')" class="btn btn-ghost btn-sm" style="margin:2px;font-size:0.8rem;">#${o.id}</button>`).join('')}`;
+}
+function quickTrack(id){ document.getElementById('orderIdInput').value=id; trackOrder(); }
+showRecentOrders();
+
+if(urlId) trackOrder();
+
+function showToast(msg,type=''){
+  const el=document.createElement('div'); el.className=`toast ${type}`; el.innerHTML=`<i class="fa ${type==='error'?'fa-exclamation-circle':'fa-check-circle'}"></i> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{ el.style.animation='slideOutRight 0.3s ease forwards'; setTimeout(()=>el.remove(),300); },2500);
+}
+</script>
+</body>
+</html>

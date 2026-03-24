@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Products – FarmDirect</title>
+<meta name="description" content="Browse and compare fresh farm produce. Filter by category, price and rating.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.listings-layout { display: grid; grid-template-columns: 260px 1fr; gap: 2rem; align-items: start; }
+.sidebar { background: var(--white); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100); position: sticky; top: 84px; }
+.sidebar h4 { font-family: var(--font-head); font-size: 0.95rem; font-weight: 700; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.06em; margin: 1.4rem 0 0.8rem; }
+.sidebar h4:first-child { margin-top: 0; }
+.filter-divider { border: none; border-top: 1px solid var(--gray-100); margin: 1rem 0 0; }
+.cat-filter-btn { width: 100%; text-align:left; padding: 0.55rem 0.9rem; border-radius: var(--radius-sm); border:none; background:none; font-size:0.88rem; font-weight:500; color:var(--gray-700); cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:8px; }
+.cat-filter-btn:hover { background: var(--green-50); color: var(--green-700); }
+.cat-filter-btn.active { background: var(--green-100); color: var(--green-700); font-weight: 700; }
+.price-labels { display:flex; justify-content:space-between; font-size:0.8rem; color:var(--gray-500); margin-top:6px; }
+.sort-bar { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+.sort-bar .results-count { font-size:0.88rem; color:var(--gray-500); }
+.search-box { position:relative; }
+.search-box i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray-500); font-size:0.9rem; }
+.search-box input { padding-left: 36px; }
+.active-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1rem; }
+.filter-chip { display:inline-flex; align-items:center; gap:6px; background:var(--green-100); color:var(--green-700); padding:4px 12px; border-radius:var(--radius-full); font-size:0.78rem; font-weight:600; }
+.filter-chip button { background:none; border:none; color:var(--green-700); font-size:0.9rem; cursor:pointer; }
+/* Compare modal */
+.compare-modal-table { width:100%; border-collapse:collapse; }
+.compare-modal-table th,.compare-modal-table td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--gray-100); font-size:0.88rem; }
+.compare-modal-table th { background:var(--green-50); color:var(--green-700); font-weight:700; }
+.compare-modal-table td:first-child { font-weight:600; color:var(--gray-700); background:var(--gray-50); }
+.compare-modal-price { font-family:var(--font-head); font-weight:800; font-size:1.1rem; color:var(--green-700); }
+.empty-state { text-align:center; padding:5rem 2rem; grid-column: 1/-1; }
+.empty-state i { font-size:3.5rem; color:var(--gray-300); margin-bottom:1rem; display:block; }
+@media(max-width:768px){
+  .listings-layout { grid-template-columns: 1fr; }
+  .sidebar { position:static; }
+}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand"><span class="logo-icon">🌾</span> Farm<span>Direct</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="listings.html" class="active">Products</a>
+      <a href="tracking.html">Track Order</a>
+      <a href="auth.html">Sign In</a>
+    </div>
+    <div class="nav-actions">
+      <a href="cart.html" class="cart-btn" id="navCartBtn"><i class="fa fa-shopping-basket"></i><span class="cart-badge" id="navCartCount">0</span></a>
+      <a href="auth.html" class="btn btn-amber btn-sm">Register</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> <i class="fa fa-chevron-right"></i> Products</div>
+    <h1>Fresh Farm Products</h1>
+    <p>Directly sourced from verified farmers. No middlemen. Fair prices.</p>
+  </div>
+</div>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="listings-layout">
+      <!-- Sidebar Filters -->
+      <aside class="sidebar">
+        <div class="search-box">
+          <i class="fa fa-search"></i>
+          <input type="text" class="form-control" id="searchInput" placeholder="Search products...">
+        </div>
+        <hr class="filter-divider">
+        <h4><i class="fa fa-tag"></i> Category</h4>
+        <div id="catFilters">
+          <button class="cat-filter-btn active" data-cat="All"><i class="fa fa-border-all"></i> All Products</button>
+          <button class="cat-filter-btn" data-cat="Vegetables"><i class="fa fa-carrot"></i> Vegetables</button>
+          <button class="cat-filter-btn" data-cat="Fruits"><i class="fa fa-apple-alt"></i> Fruits</button>
+          <button class="cat-filter-btn" data-cat="Grains"><i class="fa fa-wheat-awn"></i> Grains & Pulses</button>
+          <button class="cat-filter-btn" data-cat="Dairy"><i class="fa fa-cheese"></i> Dairy</button>
+          <button class="cat-filter-btn" data-cat="Herbs"><i class="fa fa-leaf"></i> Herbs & Spices</button>
+        </div>
+        <hr class="filter-divider">
+        <h4><i class="fa fa-rupee-sign"></i> Max Price</h4>
+        <input type="range" id="priceRange" min="10" max="700" value="700" step="10">
+        <div class="price-labels"><span>₹10</span><span id="priceVal">₹700</span></div>
+        <hr class="filter-divider">
+        <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:0.5rem;" onclick="resetFilters()"><i class="fa fa-undo"></i> Reset Filters</button>
+      </aside>
+
+      <!-- Main -->
+      <main>
+        <div class="sort-bar">
+          <div>
+            <div class="active-filters" id="activeFilters"></div>
+            <div class="results-count" id="resultsCount">Loading…</div>
+          </div>
+          <select class="form-control" id="sortSelect" style="width:auto;">
+            <option value="rating">Sort: Top Rated</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
+        <div class="grid-4" id="productsGrid"></div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- Compare Bar -->
+<div class="compare-bar" id="compareBar">
+  <div class="compare-bar-inner">
+    <div style="font-weight:700; white-space:nowrap;"><i class="fa fa-balance-scale"></i> Compare</div>
+    <div class="compare-slots" id="compareSlots"></div>
+    <button class="btn btn-amber btn-sm" onclick="openCompareModal()"><i class="fa fa-chart-bar"></i> Compare Now</button>
+    <button class="btn btn-ghost btn-sm" style="color:#fff;" onclick="clearCompare()"><i class="fa fa-times"></i></button>
+  </div>
+</div>
+
+<!-- Compare Modal -->
+<div class="modal-overlay" id="compareModal">
+  <div class="modal" style="max-width:820px;">
+    <div class="modal-header">
+      <h3><i class="fa fa-balance-scale text-green"></i> Price Comparison</h3>
+      <button class="modal-close" onclick="closeCompareModal()"><i class="fa fa-times"></i></button>
+    </div>
+    <div id="compareContent"></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js?v=2"></script>
+<script src="js/db.js?v=2"></script>
+<script>
+let currentFilters = { category:'All', search:'', maxPrice:700, sort:'rating' };
+let compareList = [];
+
+// Read URL params
+const params = new URLSearchParams(location.search);
+if(params.get('cat')) { currentFilters.category = params.get('cat'); }
+
+updateCartBadge();
+window.addEventListener('cartUpdated', updateCartBadge);
+
+async function renderProducts(){
+  const products = await getProducts(currentFilters);
+  const grid = document.getElementById('productsGrid');
+  document.getElementById('resultsCount').textContent = `${products.length} product${products.length!==1?'s':''} found`;
+
+  if(products.length===0){
+    grid.innerHTML=`<div class="empty-state"><i class="fa fa-search"></i><h3>No products found</h3><p class="text-muted">Try adjusting your filters</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = products.map(p=>{
+    const farmer = p.farmers || {};
+    const inCompare = compareList.includes(p.id);
+    return `<div class="card product-card fade-in-up">
+      <div class="card-img-wrap">
+        <img src="${p.image}" alt="${p.name}" loading="lazy">
+        <span class="badge badge-green card-cat">${p.category}</span>
+        <button class="card-compare${inCompare?' active':''}" onclick="toggleCompare('${p.id}',this)" title="Compare"><i class="fa fa-balance-scale"></i></button>
+      </div>
+      <div class="card-body">
+        <div class="card-title"><a href="product.html?id=${p.id}" style="color:inherit;">${p.name}</a></div>
+        <div class="card-farmer"><img src="${farmer.avatar||''}" alt="${farmer.name||''}"><a href="farmer-profile.html?id=${p.farmer_id}" style="color:inherit;">${farmer.name||''}</a></div>
+        <div class="card-rating">${renderStars(p.rating)} <span>(${p.rating_count})</span></div>
+        <div class="card-footer">
+          <div class="card-price">₹${p.price}<small>/${p.unit}</small></div>
+          <button class="btn btn-primary btn-sm" onclick="doAddCart('${p.id}')"><i class="fa fa-plus"></i> Add</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function doAddCart(id){ Cart.add(id,1); updateCartBadge(); showToast('Added to cart! 🛒'); }
+
+function toggleCompare(id, btn){
+  const idx = compareList.indexOf(id);
+  if(idx>-1){ compareList.splice(idx,1); btn.classList.remove('active'); }
+  else{
+    if(compareList.length>=3){ showToast('Max 3 products to compare','error'); return; }
+    compareList.push(id); btn.classList.add('active');
+  }
+  renderCompareBar();
+}
+
+function renderCompareBar(){
+  const bar = document.getElementById('compareBar');
+  const slots = document.getElementById('compareSlots');
+  if(compareList.length===0){ bar.classList.remove('visible'); return; }
+  bar.classList.add('visible');
+  slots.innerHTML = compareList.map(id=>{
+    const p=getProduct(id);
+    return `<div class="compare-slot"><span class="slot-name">${p.name}</span><button class="slot-rm" onclick="removeCompare('${id}')">✕</button></div>`;
+  }).join('');
+}
+
+function removeCompare(id){ compareList=compareList.filter(x=>x!==id); document.querySelectorAll('.card-compare').forEach(b=>{ if(b.closest('.card-img-wrap').querySelector('img').alt===getProduct(id)?.name) b.classList.remove('active'); }); renderCompareBar(); renderProducts(); }
+function clearCompare(){ compareList=[]; renderCompareBar(); renderProducts(); }
+
+async function openCompareModal(){
+  if(compareList.length<2){ showToast('Select at least 2 products to compare','error'); return; }
+  const products = await Promise.all(compareList.map(getProduct));
+  const cheapest = products.reduce((a,b)=>a.price<b.price?a:b).id;
+  const rows = [
+    { label:'Price',     fn: p=>`<span class="compare-modal-price">₹${p.price}/${p.unit}</span>` },
+    { label:'Rating',    fn: p=>`${renderStars(p.rating)} (${p.rating_count})` },
+    { label:'Category',  fn: p=>p.category },
+    { label:'Stock',     fn: p=>`${p.stock} units` },
+    { label:'Nutrition', fn: p=>`<small>${p.nutrition}</small>` },
+    { label:'Farmer',    fn: p=>p.farmers?.name||'-' },
+    { label:'Location',  fn: p=>p.farmers?.location||'-' },
+  ];
+  document.getElementById('compareContent').innerHTML=`
+    <div style="overflow-x:auto;">
+    <table class="compare-modal-table">
+      <tr><th>Feature</th>${products.map(p=>`<th>${p.name}${p.id===cheapest?' <span class="badge badge-amber">Cheapest</span>':''}</th>`).join('')}</tr>
+      ${rows.map(r=>`<tr><td>${r.label}</td>${products.map(p=>`<td>${r.fn(p)}</td>`).join('')}</tr>`).join('')}
+      <tr><td>Actions</td>${products.map(p=>`<td><button class="btn btn-primary btn-sm" onclick="doAddCart('${p.id}');closeCompareModal()">Add to Cart</button></td>`).join('')}</tr>
+    </table></div>`;
+  document.getElementById('compareModal').classList.add('open');
+}
+function closeCompareModal(){ document.getElementById('compareModal').classList.remove('open'); }
+
+// Filter handlers
+document.querySelectorAll('.cat-filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.cat-filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilters.category = btn.dataset.cat;
+    renderProducts(); updateActiveFilters();
+  });
+  if(btn.dataset.cat === currentFilters.category) { btn.classList.add('active'); btn.closest('.cat-filter-btn-wrap'); }
+});
+
+// Set active cat from URL
+if(currentFilters.category !== 'All'){
+  document.querySelectorAll('.cat-filter-btn').forEach(b=>{ b.classList.remove('active'); if(b.dataset.cat===currentFilters.category) b.classList.add('active'); });
+}
+
+document.getElementById('searchInput').addEventListener('input', e=>{
+  currentFilters.search = e.target.value; renderProducts(); updateActiveFilters();
+});
+
+document.getElementById('priceRange').addEventListener('input', e=>{
+  currentFilters.maxPrice = +e.target.value;
+  document.getElementById('priceVal').textContent = '₹'+e.target.value;
+  renderProducts(); updateActiveFilters();
+});
+
+document.getElementById('sortSelect').addEventListener('change', e=>{
+  currentFilters.sort = e.target.value; renderProducts();
+});
+
+function updateActiveFilters(){
+  const chips=[];
+  if(currentFilters.search) chips.push(`<span class="filter-chip">Search: "${currentFilters.search}" <button onclick="clearSearch()">✕</button></span>`);
+  if(currentFilters.maxPrice<700) chips.push(`<span class="filter-chip">Max ₹${currentFilters.maxPrice} <button onclick="clearPrice()">✕</button></span>`);
+  document.getElementById('activeFilters').innerHTML=chips.join('');
+}
+function clearSearch(){ document.getElementById('searchInput').value=''; currentFilters.search=''; renderProducts(); updateActiveFilters(); }
+function clearPrice(){ document.getElementById('priceRange').value=700; document.getElementById('priceVal').textContent='₹700'; currentFilters.maxPrice=700; renderProducts(); updateActiveFilters(); }
+function resetFilters(){ currentFilters={category:'All',search:'',maxPrice:700,sort:'rating'}; document.getElementById('searchInput').value=''; document.getElementById('priceRange').value=700; document.getElementById('priceVal').textContent='₹700'; document.getElementById('sortSelect').value='rating'; document.querySelectorAll('.cat-filter-btn').forEach(b=>{ b.classList.toggle('active', b.dataset.cat==='All'); }); renderProducts(); updateActiveFilters(); }
+
+function showToast(msg,type=''){
+  const el=document.createElement('div'); el.className=`toast ${type}`; el.innerHTML=`<i class="fa ${type==='error'?'fa-exclamation-circle':'fa-check-circle'}"></i> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{ el.style.animation='slideOutRight 0.3s ease forwards'; setTimeout(()=>el.remove(),300); },2500);
+}
+
+document.getElementById('compareModal').addEventListener('click', e=>{ if(e.target===document.getElementById('compareModal')) closeCompareModal(); });
+renderProducts();
+</script>
+</body>
+</html>
