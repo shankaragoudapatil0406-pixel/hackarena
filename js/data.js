@@ -1,6 +1,3 @@
-// ──────────────────────────────────────────────
-//  FarmDirect – Seed Data
-// ──────────────────────────────────────────────
 
 const FARMERS = [
   { id:'f1', name:'Rajesh Kumar',    location:'Nashik, Maharashtra',    rating:4.9, reviews:312, since:2015, avatar:'https://i.pravatar.cc/150?img=11', bio:'Third-generation farmer specialising in organic vegetables. My family has farmed this land for over 60 years.',  certified:['Organic','PGS-India'] },
