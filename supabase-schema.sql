@@ -1,4 +1,9 @@
+-- ============================================================
+--  FarmDirect – Supabase Schema
+--  Run this in: Supabase Dashboard → SQL Editor → New Query
+-- ============================================================
 
+-- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ── Farmers ─────────────────────────────────────────────────
@@ -73,13 +78,40 @@ ALTER TABLE orders       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items  ENABLE ROW LEVEL SECURITY;
 
 -- Public read on farmers and products
+DROP POLICY IF EXISTS "Public read farmers" ON farmers;
 CREATE POLICY "Public read farmers"      ON farmers     FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public read products" ON products;
 CREATE POLICY "Public read products"     ON products    FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public read reviews" ON reviews;
 CREATE POLICY "Public read reviews"      ON reviews     FOR SELECT USING (true);
 
 -- Anyone can insert reviews and orders (no auth required for demo)
+DROP POLICY IF EXISTS "Anyone insert reviews" ON reviews;
 CREATE POLICY "Anyone insert reviews"    ON reviews     FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Anyone insert orders" ON orders;
 CREATE POLICY "Anyone insert orders"     ON orders      FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Anyone insert order_items" ON order_items;
 CREATE POLICY "Anyone insert order_items"ON order_items FOR INSERT WITH CHECK (true);
-CREATE POLICY "Anyone read orders"       ON orders      FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Anyone read order_items" ON order_items;
 CREATE POLICY "Anyone read order_items"  ON order_items FOR SELECT USING (true);
+
+-- Allow authenticated/anon insertions for demo purposes (so farmers can add products/profiles)
+DROP POLICY IF EXISTS "Anyone insert farmers" ON farmers;
+CREATE POLICY "Anyone insert farmers"    ON farmers     FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Anyone update farmers" ON farmers;
+CREATE POLICY "Anyone update farmers"    ON farmers     FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Anyone insert products" ON products;
+CREATE POLICY "Anyone insert products"   ON products    FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Anyone update products" ON products;
+CREATE POLICY "Anyone update products"   ON products    FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Anyone delete products" ON products;
+CREATE POLICY "Anyone delete products"   ON products    FOR DELETE USING (true);

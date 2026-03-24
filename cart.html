@@ -204,11 +204,12 @@ async function updateSummary(items){
     const p = await getProduct(item.productId);
     if (p) subtotal += p.price * item.qty;
   }
-  const delivery = 40;
+  const delivery = 0;
   const discount = Math.round(subtotal * 0.10);
   const total    = subtotal + delivery - discount;
   document.getElementById('summarySubtotal').textContent = '₹'+subtotal;
-  document.getElementById('summaryDelivery').textContent = '₹'+delivery;
+  document.getElementById('summaryDelivery').textContent = '<span style="color:var(--green-600);font-weight:bold;">Free</span>';
+  document.getElementById('summaryDelivery').innerHTML = '<span style="color:var(--green-600);font-weight:bold;">Free</span>';
   document.getElementById('summaryDiscount').textContent = '-₹'+discount;
   document.getElementById('summaryTotal').textContent    = '₹'+total;
 }
@@ -228,7 +229,7 @@ async function submitOrder(){
   if(!name||!phone||!address||!city||!pin){ showToast('Please fill all delivery details','error'); return; }
   const subtotalEl = document.getElementById('summarySubtotal').textContent.replace('₹','');
   const items = Cart.get().map(i=>({ productId:i.productId, qty:i.qty, price:0 }));
-  const orderId = await placeOrder({ name, phone, address:address+', '+city+' '+pin, slot:selectedSlot, payment:document.getElementById('coPayment').value, items, total:+subtotalEl+40-Math.round(+subtotalEl*.10) });
+  const orderId = await placeOrder({ name, phone, address:address+', '+city+' '+pin, slot:selectedSlot, payment:document.getElementById('coPayment').value, items, total:+subtotalEl-Math.round(+subtotalEl*.10) });
   if(!orderId){ showToast('Failed to place order. Please try again.','error'); return; }
   Cart.clear();
   document.getElementById('successOrderId').textContent = orderId;

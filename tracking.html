@@ -106,6 +106,7 @@ async function loadDemo(){
 }
 
 function renderTracking(order){
+  const currentStep = order.current_step || 0;
   const isDelivered = currentStep >= 4;
   const placedMs   = new Date(order.placed_at).getTime();
   const etaDate    = new Date(placedMs + 5*3600000);
@@ -142,7 +143,7 @@ function renderTracking(order){
       </div>
       <div class="status-badge badge badge-${isDelivered?'green':'amber'}" style="font-size:0.88rem;padding:8px 18px;">
         <i class="fa fa-${isDelivered?'check-circle':'truck'}"></i>
-        ${isDelivered?'Delivered':STEP_CONFIG[order.currentStep]?.label||'Processing'}
+        ${isDelivered?'Delivered':STEP_CONFIG[currentStep]?.label||'Processing'}
       </div>
     </div>
 
@@ -170,9 +171,11 @@ function renderTracking(order){
 }
 
 // Show recent orders
-function showRecentOrders(){
-  const orders = Orders.getAll().slice(-3).reverse();
-  if(orders.length===0) return;
+async function showRecentOrders(){
+  const user = Auth.getUser();
+  if(!user) return;
+  const orders = await getUserOrders(user.email);
+  if(!orders || orders.length===0) return;
   document.getElementById('recentOrders').innerHTML = `<div style="font-size:0.82rem;color:var(--gray-500);margin-bottom:8px;">Recent Orders:</div>
     ${orders.map(o=>`<button onclick="quickTrack('${o.id}')" class="btn btn-ghost btn-sm" style="margin:2px;font-size:0.8rem;">#${o.id}</button>`).join('')}`;
 }
